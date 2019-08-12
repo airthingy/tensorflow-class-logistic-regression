@@ -41,7 +41,7 @@ Description of the columns:
 - Variance - histogram variance 
 - Tendency - histogram tendency 
 - CLASS - FHR pattern class code (1 to 10) 
-- NSP - fetal state class code (N=normal; S=suspect; P=pathologic). This is what we need to predict.
+- NSP - fetal state class code (1=normal; 2=suspect; 3=pathologic). This is what we need to predict.
 
 # Titanic Survival Prediction
 ## Downloading Source Data

@@ -3,4 +3,4 @@
 .vscode/
 linear_regressor/
 __pycache__/
-nn_regressor/
+nn_classifier/

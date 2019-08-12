@@ -21,17 +21,17 @@ def load_data():
     test_features = source_data.drop(train_features.index)
 
     # Extract the label column NSP
-    train_labels = train_features.pop("NSP")
-    test_labels = test_features.pop("NSP")
-
-    #Do one hot encoding of NSP. Example: NSP 2 is [0, 1, 0]
-    train_labels = pd.get_dummies(train_labels)
-    test_labels = pd.get_dummies(test_labels)
+    # DNNClassifier requires that labels must be:
+    #  - Integer type
+    #  - In range from 0 to number of classes. 
+    # Since the source data has labels 1, 2 and 3 we must subtract 1.
+    train_labels = train_features.pop("NSP").astype(int).subtract(1)
+    test_labels = test_features.pop("NSP").astype(int).subtract(1)
 
     #Return pandas DataFrame and Series
     return train_features, train_labels, test_features, test_labels
 
-def build_model(num_classes):
+def build_model():
     numeric_features = [
         "LB", "AC", "FM", "UC", "DL", "DS", "DP", "ASTV", "MSTV", 
         "ALTV", "MLTV", "Width", "Min", "Max", "Nmax", "Nzeros",
@@ -48,15 +48,12 @@ def build_model(num_classes):
                 key="CLASS", 
                 vocabulary_list=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
             dimension=4)
-    
 
     all_columns = numeric_columns + [class_categorical_column]
-
-    print("All columns", all_columns)
     
     optimizer_adam = tf.train.AdamOptimizer(learning_rate=0.01)
     model = tf.estimator.DNNClassifier([9,9,3], 
-        n_classes=num_classes,
+        n_classes=3, #There are 3 classes of predicted outcome: 1, 2 and 3 
         feature_columns=all_columns,  
         optimizer=optimizer_adam,
         model_dir="nn_classifier")
@@ -65,10 +62,10 @@ def build_model(num_classes):
 
 def train_model():
     train_features, train_labels, _, _ = load_data()
-    #Number of classes
-    num_classes = train_labels.shape[1]
+    print("TYPE:", type(train_labels))
+    print("TYPE:", train_labels)
 
-    nn_classifier = build_model(num_classes)
+    nn_classifier = build_model()
 
     training_input_fn = tf.estimator.inputs.pandas_input_fn(x=train_features,
                                                             y=train_labels,
@@ -79,10 +76,8 @@ def train_model():
 
 def test_model():
     _, _, test_features, test_labels = load_data()
-    #Number of classes
-    num_classes = test_labels.shape[1]
 
-    nn_classifier = build_model(num_classes)
+    nn_classifier = build_model()
 
     eval_input_fn = tf.estimator.inputs.pandas_input_fn(x=test_features,
                                                             y=test_labels,
