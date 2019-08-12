@@ -36,11 +36,12 @@ W = tf.Variable(tf.zeros([n, K]))
 b = tf.Variable(tf.zeros([K])) 
 
 # Hypothesis 
-Y_hat =  tf.nn.softmax(tf.matmul(X, W) + b)
+logits = tf.matmul(X, W) + b
+Y_hat =  tf.nn.softmax(logits)
   
 # Sigmoid Cross Entropy Cost Function 
-cost = tf.reduce_mean(-tf.reduce_sum(Y*tf.log(Y_hat), reduction_indices=1))
-  
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits( 
+                        labels=Y, logits=logits))   
 # Gradient Descent Optimizer 
 optimizer = tf.train.GradientDescentOptimizer(0.001).minimize(cost) 
 
