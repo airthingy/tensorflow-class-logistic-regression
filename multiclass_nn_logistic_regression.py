@@ -62,8 +62,6 @@ def build_model():
 
 def train_model():
     train_features, train_labels, _, _ = load_data()
-    print("TYPE:", type(train_labels))
-    print("TYPE:", train_labels)
 
     nn_classifier = build_model()
 
@@ -86,5 +84,23 @@ def test_model():
                                                             num_epochs=1)
     result = nn_classifier.evaluate(input_fn = eval_input_fn, steps=2000)
     print(result)
+
+def predict():
+    _, _, test_features, test_labels = load_data()
+
+    nn_classifier = build_model()
+
+    predict_input_fn = tf.estimator.inputs.pandas_input_fn(x=test_features,
+                                                            y=test_labels,
+                                                            batch_size=65,
+                                                            shuffle=False,
+                                                            num_epochs=1)
+    result = nn_classifier.predict(input_fn = predict_input_fn)
+    for r in result:
+        predicted_class_id = r['class_ids'][0]
+        probability = r["probabilities"][predicted_class_id]
+
+        #Convert class ID to NSP data (1 to 3)
+        print("Predicted class:", predicted_class_id + 1, "Probability:", probability)
     
 train_model()
