@@ -103,4 +103,4 @@ def predict():
         #Convert class ID to NSP data (1 to 3)
         print("Predicted class:", predicted_class_id + 1, "Probability:", probability)
     
-train_model()
+test_model()

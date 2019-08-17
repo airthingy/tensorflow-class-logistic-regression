@@ -11,6 +11,8 @@ def load_data():
     source_data = pd.read_csv("CTG.csv", usecols=use_columns)
     #Remove any rows with missing values
     source_data = source_data.dropna()
+    #Encode categorical feature CLASS using indicator variables.
+    source_data = pd.get_dummies(source_data, columns=["CLASS"], drop_first=True)
 
     # Split source into training (80%) and test data (20%)
     train_features = source_data.sample(frac=0.8, random_state=200)
@@ -65,7 +67,7 @@ with tf.Session() as sess:
     sess.run(tf.global_variables_initializer()) 
     
     # Iterating through all the epochs 
-    for epoch in range(10001): 
+    for epoch in range(100001): 
         # Running the Optimizer 
         sess.run(optimizer, feed_dict = {X : train_features, Y : train_labels}) 
     
@@ -74,6 +76,8 @@ with tf.Session() as sess:
             current_cost = sess.run(cost, feed_dict = {X : train_features, Y : train_labels}) 
             current_accuracy = sess.run(accuracy, feed_dict = {X : train_features, Y : train_labels}) 
             print("Cost:", current_cost, "Accuracy:", current_accuracy * 100.0, "%")
+            if current_accuracy > 0.9:
+                break
     
     test_accuracy = sess.run(accuracy, feed_dict = {X : test_features, Y : test_labels})
     print("Test accuracy:", test_accuracy * 100.0, "%")
