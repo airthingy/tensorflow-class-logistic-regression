@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import sys
 import tensorflow.compat.v1 as tf
 
 def load_data():
@@ -96,11 +97,24 @@ def predict():
                                                             shuffle=False,
                                                             num_epochs=1)
     result = nn_classifier.predict(input_fn = predict_input_fn)
+
+    index = 0
+    test_labels = test_labels.values + 1
+
     for r in result:
         predicted_class_id = r['class_ids'][0]
         probability = r["probabilities"][predicted_class_id]
 
         #Convert class ID to NSP data (1 to 3)
-        print("Predicted class:", predicted_class_id + 1, "Probability:", probability)
+        print("Predicted class:", predicted_class_id + 1, 
+        "Actual:", test_labels[index],
+        "Probability:", probability)
+
+        index = index + 1
     
-test_model()
+if sys.argv[1] == "--train":
+    train_model()
+elif sys.argv[1] == "--test":
+    test_model()
+elif sys.argv[1] == "--predict":
+    predict()
