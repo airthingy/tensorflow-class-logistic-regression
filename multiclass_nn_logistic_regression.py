@@ -66,11 +66,12 @@ def train_model():
 
     nn_classifier = build_model()
 
-    training_input_fn = tf.estimator.inputs.pandas_input_fn(x=train_features,
-                                                            y=train_labels,
-                                                            batch_size=65,
-                                                            shuffle=True,
-                                                            num_epochs=100)
+    training_input_fn = tf.estimator.inputs.pandas_input_fn(
+        x=train_features,
+        y=train_labels,
+        batch_size=65,
+        shuffle=True,
+        num_epochs=100)
     nn_classifier.train(input_fn = training_input_fn, steps=2000)
 
 def test_model():
@@ -78,11 +79,12 @@ def test_model():
 
     nn_classifier = build_model()
 
-    eval_input_fn = tf.estimator.inputs.pandas_input_fn(x=test_features,
-                                                            y=test_labels,
-                                                            batch_size=65,
-                                                            shuffle=False,
-                                                            num_epochs=1)
+    eval_input_fn = tf.estimator.inputs.pandas_input_fn(
+        x=test_features,
+        y=test_labels,
+        batch_size=65,
+        shuffle=False,
+        num_epochs=1)
     result = nn_classifier.evaluate(input_fn = eval_input_fn, steps=2000)
     print(result)
 
@@ -91,21 +93,23 @@ def predict():
 
     nn_classifier = build_model()
 
-    predict_input_fn = tf.estimator.inputs.pandas_input_fn(x=test_features,
-                                                            y=test_labels,
-                                                            batch_size=65,
-                                                            shuffle=False,
-                                                            num_epochs=1)
+    predict_input_fn = tf.estimator.inputs.pandas_input_fn(
+        x=test_features,
+        y=None,
+        batch_size=65,
+        shuffle=False,
+        num_epochs=1)
     result = nn_classifier.predict(input_fn = predict_input_fn)
 
     index = 0
+    # Get the actual NSP class value by adding 1
     test_labels = test_labels.values + 1
 
     for r in result:
         predicted_class_id = r['class_ids'][0]
         probability = r["probabilities"][predicted_class_id]
 
-        #Convert class ID to NSP data (1 to 3)
+        #Convert class ID to NSP data (1 to 3) by adding 1
         print("Predicted class:", predicted_class_id + 1, 
         "Actual:", test_labels[index],
         "Probability:", probability)
