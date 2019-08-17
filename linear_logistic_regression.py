@@ -8,8 +8,9 @@ def load_data(feature_file, label_file):
     features = features.values
 
     labels = pd.read_csv(label_file)
-    #Do one hot encoding: Convert 0 to [1, 0] and 1 to [0, 1]
-    labels = pd.get_dummies(labels["Survived"]).values
+    #Shape each label as [1] or [0]
+    #labels will now be mx1 where m is number of samples
+    labels = np.reshape(labels.values, [-1, 1])
 
     return features, labels
 
@@ -19,15 +20,16 @@ test_features, test_labels = load_data("test_features.csv", "test_labels.csv")
 # Number of features
 n = train_features.shape[1]
 
-#Number of classes (survived, died)
-K = 2
+#Number of classes. In a binary classification
+#there's only one class. survived=1 died=0
+K = 1
 
 # There are n columns in the feature matrix  
 X = tf.placeholder(tf.float32, [None, n]) 
   
 # Since this is a binary classification problem, 
 # each Y will be like [0, 1] or [1, 0]
-Y = tf.placeholder(tf.float32, [None, 2]) 
+Y = tf.placeholder(tf.float32, [None, K]) 
   
 # Trainable Variable Weights 
 W = tf.Variable(tf.zeros([n, K])) 
@@ -37,15 +39,17 @@ b = tf.Variable(tf.zeros([K]))
 
 # Hypothesis 
 logits = tf.matmul(X, W) + b
-Y_hat =  tf.nn.softmax(logits)
+Y_hat =  tf.nn.sigmoid(logits)
   
 # Sigmoid Cross Entropy Cost Function 
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits( 
+cost = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits( 
                         labels=Y, logits=logits))   
 # Gradient Descent Optimizer 
 optimizer = tf.train.GradientDescentOptimizer(0.001).minimize(cost) 
 
-correct_prediction = tf.equal(tf.argmax(Y_hat, 1), tf.argmax(Y, 1)) 
+#Round a prediction over 0.5 to 1 and less to 0. Then compare
+#with actual outcome.
+correct_prediction = tf.equal(tf.round(Y_hat), Y) 
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32)) 
  
 with tf.Session() as sess: 
