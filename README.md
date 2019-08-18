@@ -14,7 +14,7 @@ In this very simple workshop we will predict if it will rain given the temperatu
 ## Create the Model
 In **workshop/logistic-regression** create file called ``model.py``.
 
-You should be familiar with the mathematics of sigmoid function and how to compute cost for it.
+You should be familiar with the mathematics of sigmoid function and how to compute cost for it. We will use low level Tensorflow API to build the model. 
 
 Add this code.
 
@@ -63,7 +63,7 @@ Save your file.
 # Create the Weather Data Set
 To keep things simple we will hard code tempreature, humidity and chance of rain. In real life, of course, this will be loaded from file and there will be many more features.
 
-In **workshop/logistic-regression** create file called ``weather.py``.
+In **workshop/logistic-regression** create a file called ``weather.py``.
 
 Add this code (freel free to copy and paste from below).
 
@@ -167,6 +167,118 @@ python3 weather.py
 ```
 
 You should get near 100% accuracy.
+
+# Workshop - Titanic Survivability Prediction (Optional)
+This is a binary logistic regression problem. The model will be same as what we have already developed for rain prediction. Code will be practically same as for the weather problem, except of course we will load real life data from file. This is why the workshop is optional. There is, however, one key difference. Several features, such as class of travel and gender, are categorical in nature. In this lab we will learn to create dummy (or indicator) features for them.
+
+## Instructor Demo
+Instructor should use Jupyter notebook to demo how ``pd.get_dummies()`` works.
+
+## Prepare Data
+Source data was downloaded from:
+
+```
+https://www.kaggle.com/c/titanic
+```
+
+Open ``train.csv`` and observe the columns we will use.
+
+- **Survived** - This is the prediction. Value is 0 (died) or 1 (survived)
+- **Pclass** - Class of travel. This is a categorical column. Values are 1, 2 and 3 representing First, Second and Third class travel. Just because they have numerical values don't be tempted to use them as a numerical feature. This could have been represented as "First", "Second" and "Third". 
+- **Sex** - Gender. Values are "male" and "female". This is a categorical feature.
+- **Age**.
+- **SibSep** - Number of siblings/spouses aboard the Titanic
+- **Parch** - Number of parents/children aboard the Titanic
+- **Fare** - Fare paid for ticket
+
+The remaining columns like passenger name and ticket number are deemed irrelevant.
+
+Copy ``prepare_data.py`` from the solution folder. Open it and observe how ``pd.get_dummies()`` is used to create indicator features.
+
+Run the file.
+
+```
+python3 prepare_data.py
+```
+
+This will create the following files.
+
+- train_features.csv - Open this file and observe how the indictor coluns Pclass_2, Pclass_3, etc. are created.
+- train_labels.csv
+- test_labels.csv
+- test_features.csv
+
+## Load Data
+In **workshop/logistic-regression** create a file called ``titanic.py``.
+
+Add this code.
+
+```python
+import pandas as pd
+import numpy as np
+import tensorflow.compat.v1 as tf
+import model
+
+def load_data(feature_file, label_file):
+    features = pd.read_csv(feature_file)
+    #Convert pandas DataFrame to numpy array
+    features = features.values
+
+    labels = pd.read_csv(label_file)
+    #Convert labels from [m,] shape to [m,1] shape
+    labels = np.reshape(labels.values, [-1, 1])
+
+    return features, labels
+
+train_features, train_labels = load_data(
+    "train_features.csv", "train_labels.csv")
+test_features, test_labels = load_data(
+    "test_features.csv", "test_labels.csv")
+
+```
+
+## Create the Model
+Add this code.
+
+```python
+# Number of features
+n = train_features.shape[1]
+
+optimizer, accuracy, X, Y, Y_hat = model.build_model(num_features=n)
+```
+
+## Train and Predict
+Add this code. This is practically same as the rain prediction problem. Except we run training for a longer number of epochs.
+
+```python
+with tf.Session() as sess: 
+    # Initializing the Variables 
+    sess.run(tf.global_variables_initializer()) 
+         
+    # Iterating through all the epochs 
+    for epoch in range(50001): 
+        # Running the Optimizer 
+        sess.run(optimizer, feed_dict = {X : train_features, Y : train_labels}) 
+        
+        if epoch % 1000 == 0:
+            # Calculating cost on current Epoch 
+            current_accuracy = sess.run(accuracy, feed_dict = {X : train_features, Y : train_labels}) 
+            print("Accuracy:", current_accuracy * 100.0, "%")
+
+    pred = sess.run(Y_hat, feed_dict = {X : test_features}) 
+    test_accuracy = sess.run(accuracy, feed_dict = {X : test_features, Y : test_labels})
+    print("Test accuracy:", test_accuracy * 100.0, "%")
+```
+
+Save changes.
+
+Run the code.
+
+```python
+python3 titanic.py
+```
+
+Test should produce over 90% accuracy.
 
 # Fetal Monitoring Complication Prediction
 Cardiotocography is used to monitor fetal heartbeat and  uterine contractions during pregnancy. Various metrics are used to predict complications like hypoxia and acidosis.
