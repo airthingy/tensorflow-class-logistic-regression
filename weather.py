@@ -1,5 +1,3 @@
-import pandas as pd
-import numpy as np
 import tensorflow.compat.v1 as tf
 import model
 
@@ -48,7 +46,8 @@ test_labels = [
     [0]
 ]
 
-optimizer, accuracy, X, Y, Y_hat = model.build_model(num_features=2)
+optimizer, accuracy, X, Y, Y_hat = model.build_model(
+    num_features=2)
 
 with tf.Session() as sess: 
     # Initializing the Variables 
@@ -57,15 +56,19 @@ with tf.Session() as sess:
     # Iterating through all the epochs 
     for epoch in range(1001): 
         # Running the Optimizer 
-        sess.run(optimizer, feed_dict = {X : train_features, Y : train_labels}) 
+        sess.run(optimizer, 
+            feed_dict = {X : train_features, Y : train_labels}) 
         
         if epoch % 100 == 0:
             # Calculating cost on current Epoch 
-            current_accuracy = sess.run(accuracy, feed_dict = {X : train_features, Y : train_labels}) 
+            current_accuracy = sess.run(accuracy, 
+                feed_dict = {X : train_features, Y : train_labels}) 
             print("Accuracy:", current_accuracy * 100.0, "%")
     
-    prediction = sess.run(Y_hat, feed_dict = {X : test_features}) 
-    test_accuracy = sess.run(accuracy, feed_dict = {X : test_features, Y : test_labels})
+    prediction = sess.run(Y_hat, 
+        feed_dict = {X : test_features}) 
+    test_accuracy = sess.run(accuracy, 
+        feed_dict = {X : test_features, Y : test_labels})
     print("Test accuracy:", test_accuracy * 100.0, "%")
     for pair in zip(prediction, test_labels):
         print("Predicted:", pair[0], "Actual:", pair[1])

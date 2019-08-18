@@ -1,5 +1,7 @@
 In this repo we solve various classification (logistic regression) problems. We use both linear regression and neural network.
 
+Create a folder called **workshop/logistic-regression**. All code will go here.
+
 # Workshop - Basic Binary Linear Logistic Regression
 In this very simple workshop we will predict if it will rain given the temperature and humidity. We purposely keep the problem simple. The goal is to focus on how to create a model using Tensorflow for linear logistic regression. Specifically, we will pay attention to:
 
@@ -9,19 +11,65 @@ In this very simple workshop we will predict if it will rain given the temperatu
 - How to model cost
 - How to calculate accuracy of prediction
 
-Create a folder called **workshop/logistic-regression**. All code will go here.
+## Create the Model
+In **workshop/logistic-regression** create file called ``model.py``.
 
-# Create the Data Set
-To keep things simple we will hard code tempreature, humidity and chance of rain. In real lofe, of course, this will be loaded from file and there will be many more features.
+You should be familiar with the mathematics of sigmoid function and how to compute cost for it.
 
-In **workshop/logistic-regression** create file called ``binary_linear_logistic_regression.py``.
+Add this code.
+
+```python
+import numpy as np
+import tensorflow.compat.v1 as tf
+
+def build_model(num_features):
+    #Number of classes. In a binary classification
+    #there's only one class.
+    K = 1
+
+    # Feature matrix  
+    X = tf.placeholder(tf.float32, [None, num_features]) 
+    
+    # Since this is a binary classification problem, 
+    # each Y will be mx1 dimension
+    Y = tf.placeholder(tf.float32, [None, K]) 
+    
+    # Trainable Variable Weights 
+    W = tf.Variable(tf.zeros([num_features, K])) 
+    
+    # Trainable Variable Bias 
+    b = tf.Variable(0.0) 
+
+    # Hypothesis 
+    logits = tf.matmul(X, W) + b
+    Y_hat =  tf.nn.sigmoid(logits)
+    
+    # Sigmoid Cross Entropy Cost Function 
+    cost = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits( 
+                            labels=Y, logits=logits))   
+    # Gradient Descent Optimizer 
+    optimizer = tf.train.GradientDescentOptimizer(0.001).minimize(cost) 
+
+    #Round a prediction over 0.5 to 1 and less to 0. Then compare
+    #with actual outcome.
+    correct_prediction = tf.equal(tf.round(Y_hat), Y) 
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32)) 
+    
+    return optimizer, accuracy, X, Y, Y_hat
+```
+
+Save your file.
+
+# Create the Weather Data Set
+To keep things simple we will hard code tempreature, humidity and chance of rain. In real life, of course, this will be loaded from file and there will be many more features.
+
+In **workshop/logistic-regression** create file called ``weather.py``.
 
 Add this code (freel free to copy and paste from below).
 
 ```python
-import pandas as pd
-import numpy as np
 import tensorflow.compat.v1 as tf
+import model
 
 #Columns: Temp, Humidity
 train_features = [
@@ -72,43 +120,11 @@ test_labels = [
 >In binary classification the label matrix always has ``mx1`` dimension. Where ``m`` is the number of samples. During training the labels have values of either 0 or 1. During prediction the values range from 0 to 1. We can round the values to 0 and 1 to get an yes or no answer.
 
 ## Create the Model
-You should be familiar with the mathematics of sigmoid function and how to compute cost for it.
-
 Add this code.
 
 ```python
-# Number of features 2. Temp, Humidity
-n = 2
-
-# Input features
-# There are n columns in the feature matrix  
-X = tf.placeholder(tf.float32, [None, n]) 
-  
-# Real life prediction data
-Y = tf.placeholder(tf.float32, [None, 1]) 
-  
-# Trainable Variable Weights 
-W = tf.Variable(tf.zeros([n, 1])) 
-  
-# Trainable Variable Bias 
-b = tf.Variable(tf.zeros([1])) 
-
-# Hypothesis 
-Y_hat =  tf.nn.sigmoid(tf.matmul(X, W) + b)
-  
-# Sigmoid Cross Entropy Cost Function 
-cost = tf.reduce_mean(
-    tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=Y, logits=Y_hat))
-  
-# Gradient Descent Optimizer 
-optimizer = tf.train.GradientDescentOptimizer(0.001)
-    .minimize(cost) 
-
-# Predicted value over 0.5 is rounded to 1 or True
-correct_prediction = tf.equal(tf.round(Y_hat), Y)
-accuracy = tf.reduce_mean(
-    tf.cast(correct_prediction, tf.float32)) 
+optimizer, accuracy, X, Y, Y_hat = 
+    model.build_model(num_features=2)
 ```
 
 ## Do Training and Prediction
@@ -128,15 +144,12 @@ with tf.Session() as sess:
         
         if epoch % 100 == 0:
             # Calculating cost on current Epoch 
-            current_cost = sess.run(cost, 
-                feed_dict = {X : train_features, Y : train_labels}) 
             current_accuracy = sess.run(accuracy, 
                 feed_dict = {X : train_features, Y : train_labels}) 
-
-            print("Cost:", current_cost, 
-                "Accuracy:", current_accuracy * 100.0, "%")
+            print("Accuracy:", current_accuracy * 100.0, "%")
     
-    prediction = sess.run(Y_hat, feed_dict = {X : test_features}) 
+    prediction = sess.run(Y_hat, 
+        feed_dict = {X : test_features}) 
     test_accuracy = sess.run(accuracy, 
         feed_dict = {X : test_features, Y : test_labels})
     print("Test accuracy:", test_accuracy * 100.0, "%")
@@ -144,14 +157,17 @@ with tf.Session() as sess:
         print("Predicted:", pair[0], "Actual:", pair[1])
 ```
 
+Save your file.
+
 ## Run Code
 Run the code.
 
 ```
-python3 binary_linear_logistic_regression.py
+python3 weather.py
 ```
 
 You should get near 100% accuracy.
+
 # Fetal Monitoring Complication Prediction
 Cardiotocography is used to monitor fetal heartbeat and  uterine contractions during pregnancy. Various metrics are used to predict complications like hypoxia and acidosis.
 

@@ -17,7 +17,7 @@ def build_model(num_features):
     W = tf.Variable(tf.zeros([num_features, K])) 
     
     # Trainable Variable Bias 
-    b = tf.Variable(tf.zeros([K])) 
+    b = tf.Variable(0.0) 
 
     # Hypothesis 
     logits = tf.matmul(X, W) + b
