@@ -6,20 +6,20 @@ def build_model(num_features):
     #there's only one class.
     K = 1
 
-    # Feature matrix  
+    # Feature matrix. mxn dimension.
     X = tf.placeholder(tf.float32, [None, num_features]) 
     
     # Since this is a binary classification problem, 
-    # each Y will be mx1 dimension
+    # Y will be mx1 dimension
     Y = tf.placeholder(tf.float32, [None, K]) 
     
-    # Trainable Variable Weights 
+    # Trainable Variable Weights. nx1 dimension 
     W = tf.Variable(tf.zeros([num_features, K])) 
     
     # Trainable Variable Bias 
     b = tf.Variable(0.0) 
 
-    # Hypothesis 
+    # Hypothesis (prediction). mx1 dimension.
     logits = tf.matmul(X, W) + b
     Y_hat =  tf.nn.sigmoid(logits)
     
@@ -29,8 +29,8 @@ def build_model(num_features):
     # Gradient Descent Optimizer 
     optimizer = tf.train.GradientDescentOptimizer(0.001).minimize(cost) 
 
-    #Round a prediction over 0.5 to 1 and less to 0. Then compare
-    #with actual outcome.
+    #Round a prediction over 0.5 to 1 and less to 0. 
+    #Then compare with actual outcome.
     correct_prediction = tf.equal(tf.round(Y_hat), Y) 
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32)) 
     

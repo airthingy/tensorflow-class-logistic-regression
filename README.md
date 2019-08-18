@@ -1,12 +1,12 @@
 In this repo we solve various classification (logistic regression) problems. We use both linear regression and neural network.
 
-Create a folder called **workshop/logistic-regression**. All code will go here.
+Create a folder called **workshop/logistic-regression** anywhere in your hard drive. All code will go here.
 
 # Workshop - Basic Binary Linear Logistic Regression
 In this very simple workshop we will predict if it will rain given the temperature and humidity. We purposely keep the problem simple. The goal is to focus on how to create a model using Tensorflow for linear logistic regression. Specifically, we will pay attention to:
 
 - The dimension of feature matrix
-- The dimension of label or prediction matrix
+- The dimension of label and prediction matrix
 - How to define the hypotheses (output) function
 - How to model cost
 - How to calculate accuracy of prediction
@@ -117,7 +117,7 @@ test_labels = [
 ]
 ```
 
->In binary classification the label matrix always has ``mx1`` dimension. Where ``m`` is the number of samples. During training the labels have values of either 0 or 1. During prediction the values range from 0 to 1. We can round the values to 0 and 1 to get an yes or no answer.
+>In binary classification the label matrix always has ``mx1`` dimension. Where ``m`` is the number of samples. During training the labels have values of either 0 or 1. During prediction the values range from 0 to 1. We can round the values to 0 and 1 to get a yes or no answer.
 
 ## Create the Model
 Add this code.
@@ -129,7 +129,7 @@ optimizer, accuracy, X, Y, Y_hat =
 
 ## Do Training and Prediction
 
-Add this code. This is very similar to regression except ``prediction`` is not a real number. It is a ``mx1` matrix of real numbers ranging from 0 to 1.
+Add this code. This is very similar to regression except ``prediction`` is not a real number. It is a ``mx1`` matrix of real numbers ranging from 0 to 1.
 
 ```python
 with tf.Session() as sess: 
@@ -203,7 +203,7 @@ python3 prepare_data.py
 
 This will create the following files.
 
-- train_features.csv - Open this file and observe how the indictor coluns Pclass_2, Pclass_3, etc. are created.
+- train_features.csv - Open this file and observe how the indictor columns Pclass_2, Pclass_3, etc. are created.
 - train_labels.csv
 - test_labels.csv
 - test_features.csv
@@ -248,7 +248,7 @@ optimizer, accuracy, X, Y, Y_hat = model.build_model(num_features=n)
 ```
 
 ## Train and Predict
-Add this code. This is practically same as the rain prediction problem. Except we run training for a longer number of epochs.
+Add this code. This is practically same as the rain prediction problem. Except we run training for a larger number of epochs.
 
 ```python
 with tf.Session() as sess: 
