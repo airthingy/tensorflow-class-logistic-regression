@@ -1,5 +1,149 @@
-Here we solve classification problems. We use both linear regression and neural network.
+In this repo we solve various classification (logistic regression) problems. We use both linear regression and neural network.
 
+# Workshop - Basic Binary Linear Logistic Regression
+In this very simple workshop we will predict if it will rain given the temperature and humidity. We purposely keep the problem simple. The goal is to focus on how to create a model using Tensorflow for linear logistic regression. Specifically, we will pay attention to:
+
+- The dimension of feature matrix
+- The dimension of label or prediction matrix
+- How to define the hypotheses (output) function
+- How to model cost
+- How to calculate accuracy of prediction
+
+Create a folder called **workshop/logistic-regression**. All code will go here.
+
+# Create the Data Set
+To keep things simple we will hard code tempreature, humidity and chance of rain. In real lofe, of course, this will be loaded from file and there will be many more features.
+
+In **workshop/logistic-regression** create file called ``binary_linear_logistic_regression.py``.
+
+Add this code (freel free to copy and paste from below).
+
+```python
+import pandas as pd
+import numpy as np
+import tensorflow.compat.v1 as tf
+
+#Columns: Temp, Humidity
+train_features = [
+    # Hot and humid - rain predicted
+    [86.0, 90.0],
+    [94.0, 85.0],
+    [91.0, 82.0],
+    [84.0, 83.0],
+    [90.0, 97.0],
+    # Cold and dry - no rain
+    [52.0, 67.0],
+    [45.0, 58.0],
+    [35.0, 62.0],
+    [40.0, 61.0],
+    [48.0, 72.0]
+]
+
+train_labels = [
+    [1], # rain
+    [1],
+    [1],
+    [1],
+    [1],
+    [0], # no rain
+    [0],
+    [0],
+    [0],
+    [0]
+]
+
+test_features = [
+    # Hot and humid - rain predicted
+    [83.0, 91.0],
+    [92.5, 88.0],
+    # Cold and dry - no rain
+    [50.3, 63.0],
+    [42.0, 59.0]
+]
+
+test_labels = [
+    [1],
+    [1],
+    [0],
+    [0]
+]
+```
+
+>In binary classification the label matrix always has ``mx1`` dimension. Where ``m`` is the number of samples. During training the labels have values of either 0 or 1. During prediction the values range from 0 to 1. We can round the values to 0 and 1 to get an yes or no answer.
+
+## Create the Model
+You should be familiar with the mathematics of sigmoid function and how to compute cost for it.
+
+Add this code.
+
+```python
+# Number of features 2. Temp, Humidity
+n = 2
+
+# Input features
+# There are n columns in the feature matrix  
+X = tf.placeholder(tf.float32, [None, n]) 
+  
+# Real life prediction data
+Y = tf.placeholder(tf.float32, [None, 1]) 
+  
+# Trainable Variable Weights 
+W = tf.Variable(tf.zeros([n, 1])) 
+  
+# Trainable Variable Bias 
+b = tf.Variable(tf.zeros([1])) 
+
+# Hypothesis 
+Y_hat =  tf.nn.sigmoid(tf.matmul(X, W) + b)
+  
+# Sigmoid Cross Entropy Cost Function 
+cost = tf.reduce_mean(
+    tf.nn.sigmoid_cross_entropy_with_logits(
+        labels=Y, logits=Y_hat))
+  
+# Gradient Descent Optimizer 
+optimizer = tf.train.GradientDescentOptimizer(0.001)
+    .minimize(cost) 
+
+# Predicted value over 0.5 is rounded to 1 or True
+correct_prediction = tf.equal(tf.round(Y_hat), Y)
+accuracy = tf.reduce_mean(
+    tf.cast(correct_prediction, tf.float32)) 
+```
+
+## Do Training and Prediction
+
+Add this code. This is very similar to regression except ``prediction`` is not a real number. It is a ``mx1` matrix of real numbers ranging from 0 to 1.
+
+```python
+with tf.Session() as sess: 
+    # Initializing the Variables 
+    sess.run(tf.global_variables_initializer()) 
+         
+    # Iterating through all the epochs 
+    for epoch in range(1001): 
+        # Running the Optimizer 
+        sess.run(optimizer, feed_dict = {X : train_features, Y : train_labels}) 
+        
+        if epoch % 100 == 0:
+            # Calculating cost on current Epoch 
+            current_cost = sess.run(cost, feed_dict = {X : train_features, Y : train_labels}) 
+            current_accuracy = sess.run(accuracy, feed_dict = {X : train_features, Y : train_labels}) 
+            print("Cost:", current_cost, "Accuracy:", current_accuracy * 100.0, "%")
+    
+    prediction = sess.run(Y_hat, feed_dict = {X : test_features}) 
+    test_accuracy = sess.run(accuracy, feed_dict = {X : test_features, Y : test_labels})
+    print("Test accuracy:", test_accuracy * 100.0, "%")
+```
+
+## Run Code
+Run the code.
+
+```
+python3 binary_linear_logistic_regression.py
+```
+
+You should get near 100% accuracy.
 # Fetal Monitoring Complication Prediction
 Cardiotocography is used to monitor fetal heartbeat and  uterine contractions during pregnancy. Various metrics are used to predict complications like hypoxia and acidosis.
 

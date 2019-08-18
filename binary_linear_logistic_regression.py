@@ -77,14 +77,11 @@ correct_prediction = tf.equal(tf.round(Y_hat), Y)
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32)) 
  
 with tf.Session() as sess: 
-      
     # Initializing the Variables 
     sess.run(tf.global_variables_initializer()) 
          
     # Iterating through all the epochs 
     for epoch in range(1001): 
-        cost_per_epoch = 0
-          
         # Running the Optimizer 
         sess.run(optimizer, feed_dict = {X : train_features, Y : train_labels}) 
         
@@ -94,6 +91,6 @@ with tf.Session() as sess:
             current_accuracy = sess.run(accuracy, feed_dict = {X : train_features, Y : train_labels}) 
             print("Cost:", current_cost, "Accuracy:", current_accuracy * 100.0, "%")
     
-    pred = sess.run(Y_hat, feed_dict = {X : test_features}) 
+    prediction = sess.run(Y_hat, feed_dict = {X : test_features}) 
     test_accuracy = sess.run(accuracy, feed_dict = {X : test_features, Y : test_labels})
     print("Test accuracy:", test_accuracy * 100.0, "%")
