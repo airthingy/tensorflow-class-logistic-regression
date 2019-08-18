@@ -123,17 +123,25 @@ with tf.Session() as sess:
     # Iterating through all the epochs 
     for epoch in range(1001): 
         # Running the Optimizer 
-        sess.run(optimizer, feed_dict = {X : train_features, Y : train_labels}) 
+        sess.run(optimizer, 
+            feed_dict = {X : train_features, Y : train_labels}) 
         
         if epoch % 100 == 0:
             # Calculating cost on current Epoch 
-            current_cost = sess.run(cost, feed_dict = {X : train_features, Y : train_labels}) 
-            current_accuracy = sess.run(accuracy, feed_dict = {X : train_features, Y : train_labels}) 
-            print("Cost:", current_cost, "Accuracy:", current_accuracy * 100.0, "%")
+            current_cost = sess.run(cost, 
+                feed_dict = {X : train_features, Y : train_labels}) 
+            current_accuracy = sess.run(accuracy, 
+                feed_dict = {X : train_features, Y : train_labels}) 
+
+            print("Cost:", current_cost, 
+                "Accuracy:", current_accuracy * 100.0, "%")
     
     prediction = sess.run(Y_hat, feed_dict = {X : test_features}) 
-    test_accuracy = sess.run(accuracy, feed_dict = {X : test_features, Y : test_labels})
+    test_accuracy = sess.run(accuracy, 
+        feed_dict = {X : test_features, Y : test_labels})
     print("Test accuracy:", test_accuracy * 100.0, "%")
+    for pair in zip(prediction, test_labels):
+        print("Predicted:", pair[0], "Actual:", pair[1])
 ```
 
 ## Run Code

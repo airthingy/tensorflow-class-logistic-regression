@@ -94,3 +94,5 @@ with tf.Session() as sess:
     prediction = sess.run(Y_hat, feed_dict = {X : test_features}) 
     test_accuracy = sess.run(accuracy, feed_dict = {X : test_features, Y : test_labels})
     print("Test accuracy:", test_accuracy * 100.0, "%")
+    for pair in zip(prediction, test_labels):
+        print("Predicted:", pair[0], "Actual:", pair[1])
