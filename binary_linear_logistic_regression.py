@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import tensorflow.compat.v1 as tf
+import model
 
 #Columns: Temp, Humidity
 train_features = [
@@ -47,35 +48,8 @@ test_labels = [
     [0]
 ]
 
-# Number of features 2. Temp, Humidity
-n = 2
+optimizer, accuracy, X, Y, Y_hat = model.build_model(num_features=2)
 
-# Input features
-# There are n columns in the feature matrix  
-X = tf.placeholder(tf.float32, [None, n]) 
-  
-# Real life prediction data
-Y = tf.placeholder(tf.float32, [None, 1]) 
-  
-# Trainable Variable Weights 
-W = tf.Variable(tf.zeros([n, 1])) 
-  
-# Trainable Variable Bias 
-b = tf.Variable(tf.zeros([1])) 
-
-# Hypothesis 
-Y_hat =  tf.nn.sigmoid(tf.matmul(X, W) + b)
-  
-# Sigmoid Cross Entropy Cost Function 
-cost = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=Y, logits=Y_hat))
-  
-# Gradient Descent Optimizer 
-optimizer = tf.train.GradientDescentOptimizer(0.001).minimize(cost) 
-
-# Predicted value over 0.5 is rounded to 1 or True
-correct_prediction = tf.equal(tf.round(Y_hat), Y)
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32)) 
- 
 with tf.Session() as sess: 
     # Initializing the Variables 
     sess.run(tf.global_variables_initializer()) 
@@ -87,9 +61,8 @@ with tf.Session() as sess:
         
         if epoch % 100 == 0:
             # Calculating cost on current Epoch 
-            current_cost = sess.run(cost, feed_dict = {X : train_features, Y : train_labels}) 
             current_accuracy = sess.run(accuracy, feed_dict = {X : train_features, Y : train_labels}) 
-            print("Cost:", current_cost, "Accuracy:", current_accuracy * 100.0, "%")
+            print("Accuracy:", current_accuracy * 100.0, "%")
     
     prediction = sess.run(Y_hat, feed_dict = {X : test_features}) 
     test_accuracy = sess.run(accuracy, feed_dict = {X : test_features, Y : test_labels})
