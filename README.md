@@ -662,3 +662,40 @@ python3 nn_fetal_monitor.py --predict
 ```
 
 Observe the result.
+
+## Use Hash Bucket Feature Column
+There are a few problems with vocabulary based category columns:
+
+- You must know the complete vocabulary at the time of training
+- If the number of items in the vocabulary is very large the model can take up a lot of memory
+
+One way to solve this issue is to use a hash bucket category column. It can take string or integer data types. The values are hashed and assigned to a hash bucket. You can have fewer buckets than the total vocabulary set. For example, 1000 different English words can be squeezed into 200 hash buckets. Of course, that means, several words will be represented by the same input number. But, in reality, this doesn't seem to matter.
+
+In the ``build_model()`` function change the way ``class_categorical_column`` is created.
+
+```python
+    class_categorical_column = tf.feature_column.embedding_column(
+            tf.feature_column.categorical_column_with_hash_bucket(
+                key="CLASS", 
+                hash_bucket_size=8,
+                dtype=tf.int64),
+            dimension=4)
+```
+
+This will squeeze 10 possible values of the ``CLASS`` feature into 8. Embedding will further reduce this to 4.
+
+Before you train again remove the parameters folder.
+
+```
+rm -rf nn_classifier/
+```
+
+Then run training and test.
+
+```
+python3 nn_fetal_monitor.py --train
+
+python3 nn_fetal_monitor.py --test
+```
+
+You should still get nearly 99% accuracy.
