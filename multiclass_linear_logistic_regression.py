@@ -34,19 +34,19 @@ train_features, train_labels, test_features, test_labels = load_data()
 # Number of features
 n = train_features.shape[1]
 
-#Number of classes (survived, died)
+#Number of classes. Should be 3.
 K = train_labels.shape[1]
 
 # There are n columns in the feature matrix  
 X = tf.placeholder(tf.float32, [None, n]) 
   
-# Each prediction is a Kx1 vecor.
+# Label is mxK matrix.
 Y = tf.placeholder(tf.float32, [None, K]) 
   
-# Trainable Variable Weights 
+# Weights. nxK matrix 
 W = tf.Variable(tf.truncated_normal([n, K], stddev=0.001)) 
   
-# Trainable Variable Bias 
+# Bias. One for each class. 
 b = tf.Variable(tf.truncated_normal([K], stddev=0.001)) 
 
 # Hypothesis uses softmax
@@ -59,6 +59,8 @@ cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
 # Gradient Descent Optimizer 
 optimizer = tf.train.GradientDescentOptimizer(0.001).minimize(cost) 
 
+#Index of the highest predicted value is taken as 
+#the final decision.
 correct_prediction = tf.equal(tf.argmax(Y_hat, 1), tf.argmax(Y, 1)) 
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32)) 
  
