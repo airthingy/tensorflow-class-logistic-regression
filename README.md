@@ -169,7 +169,7 @@ python3 weather.py
 You should get near 100% accuracy.
 
 # Workshop - Titanic Survivability Prediction (Optional)
-This is a binary logistic regression problem. The model will be same as what we have already developed for rain prediction. Code will be practically same as for the weather problem, except of course we will load real life data from file. This is why the workshop is optional. There is, however, one key difference. Several features, such as class of travel and gender, are categorical in nature. In this lab we will learn to create dummy (or indicator) features for them.
+This is a binary logistic regression problem. The model will be same as what we have already developed for rain prediction. Code for training and prediction will be practically same as for the weather problem, except of course we will load real life data from file. This is why the workshop is optional. There is, however, one key difference. Several features, such as class of travel and gender, are categorical in nature. In this lab we will learn to create dummy (or indicator) features for them.
 
 ## Instructor Demo
 Instructor should use Jupyter notebook to demo how ``pd.get_dummies()`` works.
@@ -203,7 +203,7 @@ python3 prepare_data.py
 
 This will create the following files.
 
-- train_features.csv - Open this file and observe how the indictor columns Pclass_2, Pclass_3, etc. are created.
+- train_features.csv - Open this file and observe how the indictor columns ``Pclass_2``, ``Pclass_3``, etc. are created.
 - train_labels.csv
 - test_labels.csv
 - test_features.csv
@@ -281,7 +281,7 @@ python3 titanic.py
 Test should produce over 90% accuracy.
 
 # Workshop - Multi-class Linear Logistic Regression
-In this problem we need to classify a case in one of several possible categories. For example, we need to evaluate the risk of lending a sum of money to someone as Low, Medium and High.
+Here we need to classify a case in one of several possible categories. For example, we need to evaluate the risk of lending a sum of money to someone as Low, Medium and High.
 
 ## Fetal Monitoring Complication Prediction
 Cardiotocography is used to monitor fetal heartbeat and  uterine contractions during pregnancy. Various metrics are used to predict complications like hypoxia and acidosis.
@@ -327,7 +327,7 @@ Description of the columns:
 - NSP - fetal state class code (1=normal; 2=suspect; 3=pathologic). This is what we need to predict.
 
 ## Build the Model
-In **workshop/logistic-regression** folder create a file called ``fetal_monitor.py``. Add this code.
+In **workshop/logistic-regression** folder create a file called ``fetal_monitor.py``. Add this code. The key here is the use of ``softmax()`` function instead of ``sigmoid()``.
 
 ```python
 import pandas as pd
