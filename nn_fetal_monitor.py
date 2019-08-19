@@ -72,7 +72,7 @@ def train_model():
         batch_size=65,
         shuffle=True,
         num_epochs=100)
-    nn_classifier.train(input_fn = training_input_fn, steps=2000)
+    nn_classifier.train(input_fn = training_input_fn)
 
 def test_model():
     _, _, test_features, test_labels = load_data()
@@ -85,7 +85,7 @@ def test_model():
         batch_size=65,
         shuffle=False,
         num_epochs=1)
-    result = nn_classifier.evaluate(input_fn = eval_input_fn, steps=2000)
+    result = nn_classifier.evaluate(input_fn = eval_input_fn)
     print(result)
 
 def predict():
@@ -110,7 +110,7 @@ def predict():
         probability = r["probabilities"][predicted_class_id]
 
         #Convert class ID to NSP data (1 to 3) by adding 1
-        print("Predicted class:", predicted_class_id + 1, 
+        print("Predicted:", predicted_class_id + 1, 
         "Actual:", test_labels[index],
         "Probability:", probability)
 
