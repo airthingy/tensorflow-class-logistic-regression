@@ -280,7 +280,10 @@ python3 titanic.py
 
 Test should produce over 90% accuracy.
 
-# Fetal Monitoring Complication Prediction
+# Multi-class Linear Logistic Regression
+In this problem we need to classify a case in one of several possible categories. For example, we need to evaluate the risk of lending a sum of money to someone as Low, Medium and High.
+
+## Fetal Monitoring Complication Prediction
 Cardiotocography is used to monitor fetal heartbeat and  uterine contractions during pregnancy. Various metrics are used to predict complications like hypoxia and acidosis.
 
 Prediction falls under three categories:
@@ -288,7 +291,7 @@ Prediction falls under three categories:
 - Suspect: Low probability of hypoxia/acidosis
 - Pathologic: High probability of hypoxia/acidosis, requires immediate action
 
-## Downloading Source Data
+## About the Data
 Data is available as an Excel file from:
 
 ```
@@ -320,36 +323,143 @@ Description of the columns:
 - Median - histogram median 
 - Variance - histogram variance 
 - Tendency - histogram tendency 
-- CLASS - FHR pattern class code (1 to 10) 
+- CLASS - FHR pattern class code (1 to 10). This is a categorical feature.
 - NSP - fetal state class code (1=normal; 2=suspect; 3=pathologic). This is what we need to predict.
 
-# Titanic Survival Prediction
-## Downloading Source Data
-Raw data was downloaded from:
+## Build the Model
+In **workshop/logistic-regression** folder create a file called ``fetal_monitor.py``. Add this code.
+
+```python
+import pandas as pd
+import numpy as np
+import tensorflow.compat.v1 as tf
+
+def build_model(num_features, num_classes):
+    # Number of features
+    n = num_features
+
+    #Number of classes.
+    K = num_classes
+
+    # There are n columns in the feature matrix  
+    X = tf.placeholder(tf.float32, [None, n]) 
+    
+    # Label is mxK matrix.
+    Y = tf.placeholder(tf.float32, [None, K]) 
+    
+    # Weights. nxK matrix 
+    W = tf.Variable(tf.truncated_normal([n, K], stddev=0.001)) 
+    
+    # Bias. One for each class. 
+    b = tf.Variable(tf.truncated_normal([K], stddev=0.001)) 
+
+    # Hypothesis uses softmax.
+    #It is a mxK matrix
+    logits = tf.matmul(X, W) + b
+    Y_hat =  tf.nn.softmax(logits)
+
+    # Cost function for softmax hypotheses function
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits( 
+                            labels=Y, logits=logits))  
+    # Gradient Descent Optimizer 
+    optimizer = tf.train.GradientDescentOptimizer(0.001).minimize(cost) 
+
+    #Index of the highest predicted value is taken as 
+    #the final decision.
+    correct_prediction = tf.equal(tf.argmax(Y_hat, 1), tf.argmax(Y, 1)) 
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32)) 
+
+    return optimizer, X, Y, Y_hat, cost, accuracy
+```
+
+Take a moment to take stock of the dimensions of the following tensors:
+- X - Features 
+- Y - Labels 
+- Y_hat - Predictions 
+- W - Weights 
+- b - Biases
+
+## Load Data
+Add this function.
+
+```python
+def load_data():
+    use_columns = [
+        "LB", "AC", "FM", "UC", "DL", "DS", "DP", "ASTV", "MSTV", 
+        "ALTV", "MLTV", "Width", "Min", "Max", "Nmax", "Nzeros",
+        "Mode", "Mean", "Median", "Variance", "Tendency", "CLASS", "NSP" 
+    ]
+    source_data = pd.read_csv("CTG.csv", usecols=use_columns)
+    #Remove any rows with missing values
+    source_data = source_data.dropna()
+    #Encode categorical feature CLASS using indicator variables.
+    source_data = pd.get_dummies(source_data, columns=["CLASS"], drop_first=True)
+
+    # Split source into training (80%) and test data (20%)
+    train_features = source_data.sample(frac=0.8, random_state=200)
+    test_features = source_data.drop(train_features.index)
+
+    # Extract the label column NSP
+    train_labels = train_features.pop("NSP")
+    test_labels = test_features.pop("NSP")
+
+    #Do one hot encoding of NSP. Example: NSP 2 is [0, 1, 0]
+    train_labels = pd.get_dummies(train_labels)
+    test_labels = pd.get_dummies(test_labels)
+
+    #Return numpy array formatted data
+    return train_features.values, train_labels.values, test_features.values, test_labels.values
+```
+
+Note the following aspects of the code:
+- How we create indicator variables for the ``CLASS`` feature.
+- How we one hot encode the labels
+
+## Run Training and Test
+Add this code.
+
+```python
+train_features, train_labels, test_features, test_labels = load_data()
+# Number of features
+num_features = train_features.shape[1]
+#Number of classes. Should be 3.
+num_classes = train_labels.shape[1]
+
+optimizer, X, Y, Y_hat, cost, accuracy = build_model(num_features, num_classes)
+
+with tf.Session() as sess: 
+    # Initializing the Variables 
+    sess.run(tf.global_variables_initializer()) 
+    
+    # Iterating through all the epochs 
+    for epoch in range(100001): 
+        # Running the Optimizer 
+        sess.run(optimizer, feed_dict = {X : train_features, Y : train_labels}) 
+    
+        # Calculating cost on current Epoch 
+        if epoch % 1000 == 0:
+            current_cost = sess.run(cost, feed_dict = {X : train_features, Y : train_labels}) 
+            current_accuracy = sess.run(accuracy, feed_dict = {X : train_features, Y : train_labels}) 
+            print("Cost:", current_cost, "Accuracy:", current_accuracy * 100.0, "%")
+            if current_accuracy > 0.9:
+                break
+    
+    test_accuracy = sess.run(accuracy, feed_dict = {X : test_features, Y : test_labels})
+    print("Test accuracy:", test_accuracy * 100.0, "%")
+    prediction = sess.run(Y_hat, feed_dict = {X : test_features})
+    #Convert prediction and labels to NSP values
+    prediction = np.argmax(prediction, axis=1) + 1
+    expected = np.argmax(test_labels, axis=1) + 1
+    for pair in zip(prediction, expected):
+        print("Predicted:", pair[0], "Expected:", pair[1])
+```
+
+Most of this should be straightforward. But pay attention to how we are getting the predicted NSP values.
+
+Save changes and run the code.
 
 ```
-https://www.kaggle.com/c/titanic
+python3 fetal_monitor.py
 ```
 
-These are the source files:
-
-- train.csv - Training data
-- test.csv - Test data. But the **Survival** column is not included here for some reason.
-- gender_submission.csv - Test survival data is here.
-
-Description of the columns:
-- PassengerId - Passenger ID. Not useful for classification.
-- Survived - Encoded as 0 (died) and 1 (survived).
-- Pclass - Class of travel ticket. 1 for first class and so on.
-- Name - Name of passenger. Not useful for classification.
-- Sex - Gender: male or female.
-- Age - Age.
-- SibSp - Number of Sibling/Spouse aboard
-- Parch - Number of Parent/Child aboard
-- Ticket - Ticket number. Not useful for classification.
-- Fare - Price paid for ticket.
-- Cabin - Cabin number. Not useful for classification.
-- Embarked - Port where embarked on ship. Not useful for classification.
-
-## Preparing Data
-It was cleaned up and processed using ``prepare_data.py``. Rows with key missing data are simply excluded instead of filled in with some defaults. Gender is encoded as female=1 and male=2.
+You should get about 90% accuracy.
